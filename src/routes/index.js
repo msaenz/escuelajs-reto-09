@@ -1,13 +1,13 @@
 const express = require('express');
 const path = require('path');
-const ProductService = require('../services');
+const ProductsService = require('../services');
 const receipt = '../assets/receipt.pdf'
 
 const platziStore = (app) => {
   const router = express.Router();
   app.use('/api/', router);
 
-  const productService = new ProductService();
+  const productService = new ProductsService();
 
   router.get('/', (req, res) => {
     res.send(`API v2`);
@@ -19,8 +19,15 @@ const platziStore = (app) => {
   });
 
   router.get('/products', async (req, res, next) => {
-    const storeProducts = await productService.getProducts()
-    res.status(200).json(storeProducts);
+    const { tags } = req.query
+    try {
+      const storeProducts = await productService.getProducts({ tags })
+      console.log(storeProducts)
+      res.status(200).json({ data: storeProducts, message: 'Products listed' })      
+    } catch (err) {
+      next(err)
+    }
+
   });
 
   router.get('*', (req, res) => {
